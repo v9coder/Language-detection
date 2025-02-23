@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+    .chat-container {
+      width: 40%;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .message {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+      max-width: 80%;
+    }
+    .user-message {
+      background-color: #007bff;
+      color: white;
+      text-align: right;
+      margin-left: auto;
+    }
+    .bot-message {
+      background-color: #ddd;
+      text-align: left;
+      margin-right: auto;
+    }
+    .input-box {
+      display: flex;
+      justify-content: space-between;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h2>Language Detection Chatbot</h2>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="input-box">
+      <input type="text" id="user-input" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // Trigger sendMessage when Enter key is pressed
+    document.getElementById("user-input").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      let userInput = document.getElementById("user-input").value;
+      if (!userInput) return;
+
+      // Display user message
+      let chatBox = document.getElementById("chat-box");
+      let userMessage = `<div class="message user-message">${userInput}</div>`;
+      chatBox.innerHTML += userMessage;
+      document.getElementById("user-input").value = "";
+
+      // Send to Flask API
+      fetch("http://127.0.0.1:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+      })
+      .then(response => response.json())
+      .then(data => {
+        let botMessage = `<div class="message bot-message"><strong>${data.language}:</strong> ${data.response}</div>`;
+        chatBox.innerHTML += botMessage;
+        chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
+      })
+      .catch(error => console.error("Error:", error));
+    }
+  </script>
+</body>
+</html>
